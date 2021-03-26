@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Files</title>
+{% endblock %}
+
+{% block body %}
+<div class="content">
+    <h1 style="text-align: center">Files</h1>
+    {% if files|length < 1 %}
+    <h4 style="text-align: center">There are no files. Add one below!</h4>
+    {% else %}
+    <table>
+        <tr>
+            <th>Files</th>
+       
+            <th>Actions</th>
+        </tr>
+        {% for file in files %}
+            <tr>
+                <td>{{ file }}</td>
+               
+                <td>
+                    <a href="/delete/{{file}}">Delete</a>
+                    <br>
+                    <a href="/insert/{{file}}">Insert Data</a> 
+                </td> 
+            </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+
+     <!--<div class="form">
+        <form action="/" method="POST">
+            <input type="text" name="content" id="content">
+            <input type="submit" value="Add Task">
+        </form> 
+    </div>-->
+    <form action = "http://localhost:5000/" method = "POST" 
+         enctype = "multipart/form-data">
+         <input type = "file" name = "file" />
+         <input type = "submit"/>
+    </form>  
+</div>
+{% endblock %}
