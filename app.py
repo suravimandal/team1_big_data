@@ -98,11 +98,13 @@ def upload_csv_to_database(file_name):
             try:
                 cur.copy_from(f, table_name, sep=',')
                 conn.commit()
-            except:
+            except DatabaseError:
+                transaction.rollback()
                 print("data already exists in the database")
            
 
-        except:
+        except DatabaseError:
+            transaction.rollback()
             print("table already exists")
         
 
@@ -156,7 +158,19 @@ def insert(filename):
     
     upload_csv_to_database('UPLOADS/'+filename)
     return redirect('/')
-    
+
+@app.route('/getData/<string:filename>', methods=['GET']) 
+def contextget(filename):
+    with open('UPLOADS/'+filename, 'r') as f:
+        i = next(f)
+        table_name = ''
+        for p in i.split(','):
+            table_name = table_name + p
+    sql_query ="""SELECT * FROM """ + table_name
+    out = cur.execute(sql_query)
+    context_records = cur.fetchall() 
+    conn.commit()
+    return render_template('index.html', records=context_records, column_names = i.split(','))
 
 # @app.route('/', methods=['POST', 'GET'])
 # def index():

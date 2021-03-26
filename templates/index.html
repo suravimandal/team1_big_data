@@ -24,6 +24,8 @@
                     <a href="/delete/{{file}}">Delete</a>
                     <br>
                     <a href="/insert/{{file}}">Insert Data</a> 
+                    <br>
+                    <a href="/getData/{{file}}">Get Data</a> 
                 </td> 
             </tr>
         {% endfor %}
@@ -40,6 +42,26 @@
          enctype = "multipart/form-data">
          <input type = "file" name = "file" />
          <input type = "submit"/>
-    </form>  
+    </form> 
+    <table>
+        <tr>
+            {% for col in column_names %}
+            <th>{{col}}</th>
+            {% endfor %}
+           
+        </tr>
+        {% for record in records %}
+            <tr>
+                
+                <td>
+                   {% for entry in record %}
+                    <th>{{entry}}</th>
+                    {% endfor %}
+                </td>
+               
+                
+            </tr>
+        {% endfor %}
+    </table> 
 </div>
 {% endblock %}
