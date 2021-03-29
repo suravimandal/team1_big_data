@@ -15,12 +15,17 @@ from datetime import datetime
 import csv
 import psycopg2
 app = Flask(__name__)
-conn = psycopg2.connect("host=localhost dbname=postgres user=postgres password=password")
+
+if app.config['ENV'] == 'development':
+    app.config.from_object('config.DevelopmentConfig')
+else:
+    app.config.from_object('config.ProductionConfig')
+conn = psycopg2.connect(host=app.config['DB_HOST'], dbname=app.config['DB_NAME'], user=app.config['DB_USER'], password=app.config['DB_PASS'])
 cur = conn.cursor()
-UPLOAD_FOLDER = 'UPLOADS'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+
 ALLOWED_EXTENSIONS = {'txt','csv'}
-app.config['SECRET_KEY']='yhjfyvjuyetcuyfuyjvkutgkigukjgbkg'
+app.config['']=''
 
 def int_checker(lst):
     x = True
@@ -115,7 +120,7 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
+print(os.getcwd() + '/UPLOADS/')
 	
 @app.route('/', methods = ['GET', 'POST'])
 def upload_file():
@@ -137,15 +142,15 @@ def upload_file():
             
             filename = secure_filename(file.filename)
             
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            file.save(os.path.join(os.getcwd() + '/UPLOADS', filename))
         return redirect('/')  
    else:
         #onlyfiles = [f for f in listdir(os.path.join(app.config['UPLOAD_FOLDER'])) if isfile(join('', f))]
-        onlyfiles = listdir(os.path.join(app.config['UPLOAD_FOLDER']))
+        onlyfiles = listdir(os.getcwd() + '/UPLOADS/')
         
         return render_template('index.html', files=onlyfiles)
 
-@app.route('/delete/<string:filename>')
+@app.route('/delete/file/<string:filename>')
 def delete(filename):
     
     try:
@@ -153,11 +158,30 @@ def delete(filename):
         return redirect('/')
     except:
         return 'There was a problem deleting that task'
+@app.route('/delete/database/<string:filename>')
+def delete_database(filename):
+    with open('UPLOADS/' + filename, 'r') as f:
+        i = next(f)
+        table_name = ''
+        for p in i.split(','):
+            if len(table_name)<63:
+                table_name = table_name + p
+            else:
+                break
+    try:
+        print(table_name)
+        cur.execute("TRUNCATE "+ table_name)
+        return redirect('/')
+    except:
+        transaction.rollback()
+        return 'There was a problem deleting that task'
 @app.route('/insert/<string:filename>')
 def insert(filename):
-    
-    upload_csv_to_database('UPLOADS/'+filename)
-    return redirect('/')
+    try:
+        upload_csv_to_database('UPLOADS/'+filename)
+        return redirect('/')
+    except :
+        transaction.rollback()
 
 @app.route('/getData/<string:filename>', methods=['GET']) 
 def contextget(filename):
@@ -167,11 +191,15 @@ def contextget(filename):
         for p in i.split(','):
             table_name = table_name + p
     sql_query ="""SELECT * FROM """ + table_name
-    out = cur.execute(sql_query)
-    context_records = cur.fetchall() 
-    conn.commit()
-    return render_template('index.html', records=context_records, column_names = i.split(','))
+    try:
+        out = cur.execute(sql_query)
+        context_records = cur.fetchall() 
+        conn.commit()
+        return render_template('index.html', records=context_records, column_names = i.split(','))
+    except:
+        transaction.rollback()
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    
+    app.run()
