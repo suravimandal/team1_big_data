@@ -88,6 +88,9 @@ def table_creation_script(file_name, tableName):
 #             l = row
 #         return l
 
+def processDataAndBroadCast():
+    exec(open(os.getcwd() +'pythonfile.py').read())
+
 def upload_csv_to_database(file_name):
     with open(file_name, 'r') as f:
         i = next(f)
@@ -179,6 +182,13 @@ def delete_database(filename):
 def insert(filename):
     try:
         upload_csv_to_database('UPLOADS/'+filename)
+        return redirect('/')
+    except :
+        transaction.rollback()
+@app.route('/processDataAndBroadCast/<string:filename>')
+def processAndBroadCast(filename):
+    try:
+        processDataAndBroadCast()
         return redirect('/')
     except :
         transaction.rollback()

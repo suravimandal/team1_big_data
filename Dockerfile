@@ -5,4 +5,5 @@ COPY . .
 WORKDIR .
 RUN pip3 install --no-cache-dir -r requirements.txt
 ENV FLASK_ENV='production'
+EXPOSE 5000
 CMD flask run
