@@ -20,7 +20,7 @@ if app.config['ENV'] == 'development':
     app.config.from_object('config.DevelopmentConfig')
 else:
     app.config.from_object('config.ProductionConfig')
-conn = psycopg2.connect(host=app.config['DB_HOST'], dbname=app.config['DB_NAME'], user=app.config['DB_USER'], password=app.config['DB_PASS'])
+conn = psycopg2.connect(host=app.config['DB_HOST'], database=app.config['DB_NAME'], user=app.config['DB_USER'], password=app.config['DB_PASS'])
 cur = conn.cursor()
 
 

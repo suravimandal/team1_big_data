@@ -150,10 +150,11 @@ transformed_dataset = data
 transformed_dataset.head()
 
 ## Capture the dependent feature in y_train dataset
-y_train = transformed_dataset[['SalePrice']]
+y_train=transformed_dataset[['Id','SalePrice']]
+
 
 ## drop dependent feature from X_train dataset
-X_train = transformed_dataset.drop(['SalePrice'], axis=1)
+X_train=transformed_dataset.drop(['SalePrice'],axis=1)
 
 ## for feature slection
 # to visualise al the columns in the dataframe
@@ -168,9 +169,13 @@ feature_sel_model.get_support()
 
 # make a list of the selected features
 selected_feat = X_train.columns[(feature_sel_model.get_support())]
-X_train = X_train[selected_feat]
-print('total number of selected features', X_train.shape)
-X_train[selected_feat].to_csv(os.getcwd() + '/UPLOADS/selected.csv', index=False)
+X_train=X_train[selected_feat]
+selected = pd.merge(X_train, y_train)
+print('total number of selected features',selected.shape)
+
+selected.to_csv(os.getcwd() + '/UPLOADS/selected.csv',index=False)
+
+
 
 ###Convert csv to json----------------------------------------------------------
 import csv
