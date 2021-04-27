@@ -13,7 +13,7 @@ class ProductionConfig(Config):
     DB_HOST = 'localhost'
     DB_NAME = 'postgres'
     DB_USER = 'postgres'
-    DB_PASS = 'password'
+    DB_PASS = 'mysecretpassword'
 class DevelopmentConfig(Config):
     pass
     

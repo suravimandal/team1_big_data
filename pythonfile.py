@@ -126,28 +126,29 @@ for feature in categorical_features:
     labels_ordered = {k: i for i, k in enumerate(labels_ordered, 0)}
     dataset[feature] = dataset[feature].map(labels_ordered)
 
+
 ##Feature Scaling
-
-scaling_feature = [feature for feature in dataset.columns if feature not in ['Id', 'SalePerice']]
-feature_scale = [feature for feature in dataset.columns if feature not in ['Id', 'SalePrice']]
-
-scaler = MinMaxScaler()
+scaling_feature=[feature for feature in dataset.columns if feature not in ['Id','SalePerice'] ]
+feature_scale=[feature for feature in dataset.columns if feature not in ['Id','SalePrice']]
+scaler=MinMaxScaler()
 scaler.fit(dataset[feature_scale])
 
 scaler.transform(dataset[feature_scale])
 
+
 # transform the train and test dataset into normalised form, and add on the Id and SalePrice variables
 data = pd.concat([dataset[['Id', 'SalePrice']].reset_index(drop=True),
-                  pd.DataFrame(scaler.transform(dataset[feature_scale]), columns=feature_scale)],
-                 axis=1)
+                    pd.DataFrame(scaler.transform(dataset[feature_scale]), columns=feature_scale)],
+                    axis=1)
+data.to_csv(os.getcwd() + '/UPLOADS/X_train.csv',index=False)
 
-data.to_csv(os.getcwd() + '/UPLOADS/X_train.csv', index=False)
 
 # to visualise al the columns in the dataframe
 pd.pandas.set_option('display.max_columns', None)
 
-transformed_dataset = data
-transformed_dataset.head()
+
+transformed_dataset=data
+
 
 ## Capture the dependent feature in y_train dataset
 y_train=transformed_dataset[['Id','SalePrice']]
@@ -156,24 +157,34 @@ y_train=transformed_dataset[['Id','SalePrice']]
 ## drop dependent feature from X_train dataset
 X_train=transformed_dataset.drop(['SalePrice'],axis=1)
 
-## for feature slection
-# to visualise al the columns in the dataframe
-pd.pandas.set_option('display.max_columns', None)
-dataset = pd.read_csv(os.getcwd() + '/UPLOADS/X_train.csv')
+#print(X_train.shape, y_train.shape)
 
-feature_sel_model = SelectFromModel(
-    Lasso(alpha=0.005, random_state=0))  # remember the random state in this function  to be used in the other file
+
+
+
+feature_sel_model = SelectFromModel(Lasso(alpha=0.005, random_state=0)) # remember to set the seed, the random state in this function
 feature_sel_model.fit(X_train, y_train)
 
 feature_sel_model.get_support()
 
 # make a list of the selected features
 selected_feat = X_train.columns[(feature_sel_model.get_support())]
-X_train=X_train[selected_feat]
-selected = pd.merge(X_train, y_train)
-print('total number of selected features',selected.shape)
+#print('total features: {}'.format((X_train.shape[1])))
+#print('selected features: {}'.format(len(selected_feat)))
 
+X_train=X_train[selected_feat]
+X_train.to_csv(os.getcwd() + '/UPLOADS/X_train.csv',index=False)
+y_train.to_csv(os.getcwd() + '/UPLOADS/y_train.csv',index=False)
+
+selected = pd.merge(X_train, y_train)
+#print('total number of  features in the file named selected',selected.shape)
 selected.to_csv(os.getcwd() + '/UPLOADS/selected.csv',index=False)
+
+
+
+
+
+
 
 
 

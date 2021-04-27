@@ -20,7 +20,7 @@ if app.config['ENV'] == 'development':
     app.config.from_object('config.DevelopmentConfig')
 else:
     app.config.from_object('config.ProductionConfig')
-conn = psycopg2.connect(host=app.config['DB_HOST'], database=app.config['DB_NAME'], user=app.config['DB_USER'], password=app.config['DB_PASS'])
+conn = psycopg2.connect(host=app.config['DB_HOST'], dbname=app.config['DB_NAME'], user=app.config['DB_USER'], password=app.config['DB_PASS'])
 cur = conn.cursor()
 
 
@@ -89,7 +89,8 @@ def table_creation_script(file_name, tableName):
 #         return l
 
 def processDataAndBroadCast():
-    exec(open(os.getcwd() +'pythonfile.py').read())
+    os.system('python pythonfile.py')
+    #execfile(open(os.getcwd() +'/pythonfile.py').read())
 
 def upload_csv_to_database(file_name):
     with open(file_name, 'r') as f:
@@ -187,11 +188,9 @@ def insert(filename):
         transaction.rollback()
 @app.route('/processDataAndBroadCast/<string:filename>')
 def processAndBroadCast(filename):
-    try:
-        processDataAndBroadCast()
-        return redirect('/')
-    except :
-        transaction.rollback()
+    processDataAndBroadCast()
+    return redirect('/')
+    
 
 @app.route('/getData/<string:filename>', methods=['GET']) 
 def contextget(filename):
