@@ -11,4 +11,7 @@ psycopg2==2.8.6
 pandas==1.1.5
 requests
 certifi
+matplotlib
+seaborn
+scikit-learn
 confluent-kafka[avro,json,protobuf]>=1.4.2

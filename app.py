@@ -8,12 +8,13 @@ import pandas as pd
 from os import listdir
 import os
 from os.path import isfile, join
-
+import ccloud_lib
 
 
 from datetime import datetime
 import csv
 import psycopg2
+import pythonfile
 app = Flask(__name__)
 
 if app.config['ENV'] == 'development':
@@ -58,7 +59,7 @@ def table_creation_script(file_name, tableName):
         #print(i)
         if int_checker(my_csv.iloc[:, i].values):
             if parameter == 'Id':
-                strq = strq + parameter + """ INTEGER NOT NULL PRIMARY KEY"""
+                strq = strq + parameter + """ INTEGER NOT NULL"""
             else:
                 strq=strq+parameter+ """ INTEGER"""
         else:
@@ -88,9 +89,18 @@ def table_creation_script(file_name, tableName):
 #             l = row
 #         return l
 
-def processDataAndBroadCast():
-    os.system('python pythonfile.py')
-    #execfile(open(os.getcwd() +'/pythonfile.py').read())
+# def processDataAndBroadCast():
+#     os.system('python pythonfile.py')
+   
+
+def processDataAndBroadCast(csvFilePath, topic):
+    csvFilePath = os.getcwd() + '/UPLOADS/'+csvFilePath
+    jsonFilePath = csvFilePath.split(".")[0]+".json"
+    print(jsonFilePath)
+    print(csvFilePath)
+    pythonfile.make_json(csvFilePath, jsonFilePath, topic)
+   
+
 
 def upload_csv_to_database(file_name):
     with open(file_name, 'r') as f:
@@ -186,9 +196,15 @@ def insert(filename):
         return redirect('/')
     except :
         transaction.rollback()
+
+
 @app.route('/processDataAndBroadCast/<string:filename>')
 def processAndBroadCast(filename):
-    processDataAndBroadCast()
+    if(filename == "selected.csv"):
+        topic = "transformed_data_stream"
+    elif( filename == "train.csv"):
+        topic = "raw_data_stream"
+    processDataAndBroadCast(filename, topic)
     return redirect('/')
     
 
@@ -201,6 +217,7 @@ def contextget(filename):
             table_name = table_name + p
     sql_query ="""SELECT * FROM """ + table_name
     try:
+        
         out = cur.execute(sql_query)
         context_records = cur.fetchall() 
         conn.commit()

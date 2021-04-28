@@ -20,7 +20,7 @@ import os
 # Read arguments and configurations and initialize
 args = ccloud_lib.parse_args()
 config_file = os.getcwd() + '/python.config'
-topic = "data_stream"
+
 
 conf = ccloud_lib.read_ccloud_config(config_file)
 
@@ -31,7 +31,7 @@ producer_conf['ssl.ca.location'] = certifi.where()
 producer = Producer(producer_conf)
 
 # Create topic if needed
-ccloud_lib.create_topic(conf, topic)
+
 
 delivered_records = 0
 
@@ -60,6 +60,68 @@ def acked(err, msg):
 
 
 dataset = pd.read_csv(os.getcwd() + '/UPLOADS/train.csv')
+
+####------------------------------------------------------------------------------------------------------------
+###Convert Raw Data features .csv to json----------------------------------------------------------
+import csv
+import json
+
+csvFilePath = os.getcwd() + '/UPLOADS/selected.csv'
+jsonFilePath = os.getcwd() + '/UPLOADS/'
+
+
+# Function to convert a CSV to JSON
+# Takes the file paths as arguments
+def make_json(csvFilePath, jsonFilePath, topic):
+    # create a dictionary
+    data = {}
+    ccloud_lib.create_topic(conf, topic)
+
+    # Open a csv reader called DictReader
+    with open(csvFilePath, encoding='utf-8') as csvf:
+        csvReader = csv.DictReader(csvf)
+
+        # Convert each row into a dictionary
+        # and add it to data
+        for rows in csvReader:
+            # Assuming a column named 'Id' to
+            # be the primary key
+            key = rows['Id']
+            data[key] = rows
+        #print(rows)
+            record_value = json.dumps(rows)
+            producer.produce(topic, key=key, value=record_value, on_delivery=acked)
+            producer.poll(0)
+
+
+    producer.flush()
+
+# Open a json writer, and use the json.dumps()
+# function to dump data
+
+    with open(jsonFilePath, 'w', encoding='utf-8') as jsonf:
+        jsonf.write(json.dumps(data, indent=4))
+
+# Driver Code
+
+# Decide the two file paths according to your
+# computer system
+# csvFilePath = os.getcwd() + '/UPLOADS/train.csv'
+# jsonFilePath = os.getcwd() + '/UPLOADS/RawDataJsonObject.json'
+
+# # Call the make_json function
+# make_json(csvFilePath, jsonFilePath, topic)
+####------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
 
 categorical_features = [feature for feature in dataset.columns if dataset[feature].dtypes == 'O']
 numerical_features = [feature for feature in dataset.columns if dataset[feature].dtypes != 'O']
@@ -184,54 +246,3 @@ selected.to_csv(os.getcwd() + '/UPLOADS/selected.csv',index=False)
 
 
 
-
-
-
-
-###Convert csv to json----------------------------------------------------------
-import csv
-import json
-
-csvFilePath = os.getcwd() + '/UPLOADS/selected.csv'
-jsonFilePath = os.getcwd() + '/UPLOADS/'
-
-
-# Function to convert a CSV to JSON
-# Takes the file paths as arguments
-def make_json(csvFilePath, jsonFilePath):
-    # create a dictionary
-    data = {}
-
-    # Open a csv reader called DictReader
-    with open(csvFilePath, encoding='utf-8') as csvf:
-        csvReader = csv.DictReader(csvf)
-
-        # Convert each row into a dictionary
-        # and add it to data
-        for rows in csvReader:
-            # Assuming a column named 'Id' to
-            # be the primary key
-            key = rows['Id']
-            data[key] = rows
-        #print(rows)
-            record_value = json.dumps(rows)
-            producer.produce(topic, key=key, value=record_value, on_delivery=acked)
-            producer.poll(0)
-
-
-    producer.flush()
-
-# Open a json writer, and use the json.dumps()
-# function to dump data
-    with open(jsonFilePath, 'w', encoding='utf-8') as jsonf:
-        jsonf.write(json.dumps(data, indent=4))
-
-# Driver Code
-
-# Decide the two file paths according to your
-# computer system
-csvFilePath = os.getcwd() + '/UPLOADS/X_train.csv'
-jsonFilePath = os.getcwd() + '/UPLOADS/JsonObject.json'
-
-# Call the make_json function
-make_json(csvFilePath, jsonFilePath)

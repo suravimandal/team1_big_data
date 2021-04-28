@@ -21,15 +21,21 @@
                 <td>{{ file }}</td>
                
                 <td>
-                    <a href="/delete/file/{{file}}">Delete File</a>
-                    <br>
-                    <a href="/delete/database/{{file}}">Delete Table</a>
-                    <br>
-                    <a href="/insert/{{file}}">Insert Data Into Database</a> 
-                    <br>
-                    <a href="/getData/{{file}}">Get Data</a> 
-    >               <br>
-                    <a href="processDataAndBroadCast/{{file}}">Process Data and BroadCast</a>
+                    {% if file =="train.csv" %}
+                        <a href="/delete/file/{{file}}">Delete File</a>
+                        <br>
+                        <a href="/delete/database/{{file}}">Delete Table</a>
+                        <br>
+                        <a href="/insert/{{file}}">Insert Data Into Database</a> 
+                        <br>
+                        <a href="/getData/{{file}}">Get Data</a> 
+        >               <br>
+                        
+                            <a href="processDataAndBroadCast/{{file}}">BroadCast Raw data</a>
+                    {% elif file == "selected.csv" %}
+                            <a href="processDataAndBroadCast/{{file}}">BroadCast Processed</a>
+
+                    {%  endif  %}
                 </td> 
             </tr>
         {% endfor %}
