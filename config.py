@@ -13,7 +13,7 @@ class ProductionConfig(Config):
     DB_HOST = '0.0.0.0'
     DB_NAME = 'postgres'
     DB_USER = 'postgres'
-    DB_PASS = 'mysecretpassword'
+    DB_PASS = 'postgres'
 class DevelopmentConfig(Config):
     pass
     

@@ -105,7 +105,7 @@ def processDataAndBroadCast(csvFilePath, topic):
 def upload_csv_to_database(file_name):
     with open(file_name, 'r') as f:
         i = next(f)
-        table_name = ''
+        table_name = file_name.split("/")[1].split(".")[0]
         for p in i.split(','):
             table_name = table_name + p
         
